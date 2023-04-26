@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class StockServiceTest {
 
     @Autowired
-    private StockService service;
+    private PessimisticLockService service;
 
     @Autowired
     private StockRepository repository;
@@ -29,12 +29,14 @@ public class StockServiceTest {
         Stock stock = new Stock(1L, 100L);
         repository.save(stock);
         repository.flush();
+        System.out.println("****before");
     }
-
+/*
     @AfterEach
     public void after() {
         repository.deleteAll();
     }
+*/
 
     @Test
     public void 재고감소(){
@@ -46,7 +48,7 @@ public class StockServiceTest {
 
     }
 
-    @Test  //race condition
+    @Test
     public void 동시100개_요청() throws InterruptedException {
         int threadCnt = 100;
         CountDownLatch countDownLatch = new CountDownLatch(threadCnt);
