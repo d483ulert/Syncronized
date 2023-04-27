@@ -1,6 +1,7 @@
 package com.example.syncro.service;
 
 import com.example.syncro.entity.Stock;
+import com.example.syncro.facade.OptimisticLockStockFacade;
 import com.example.syncro.repository.StockRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,10 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 @SpringBootTest
-public class StockServiceTest {
+public class OptimisticLockTest {
 
     @Autowired
-    private PessimisticLockService service;
+    private OptimisticLockStockFacade facade;
 
     @Autowired
     private StockRepository repository;
@@ -31,16 +32,15 @@ public class StockServiceTest {
         repository.flush();
         System.out.println("****before");
     }
-/*
+
     @AfterEach
     public void after() {
         repository.deleteAll();
     }
-*/
 
     @Test
-    public void 재고감소(){
-        service.decrease(1L,1L);
+    public void 재고감소() throws InterruptedException {
+        facade.decrease(1L,1L);
         // 100 -1 = 99
         Stock stock = repository.findById(1L).orElseThrow();
 
@@ -58,8 +58,10 @@ public class StockServiceTest {
         for (int i=0; i< threadCnt; i++){
             executorService.submit(() -> {
                 try{
-                    service.decrease(20L,1L);
-                }finally {
+                    facade.decrease(20L,1L);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                } finally {
                     countDownLatch.countDown(); //다른 쓰레드 작업을 다 하도록 대기
                 }
             });

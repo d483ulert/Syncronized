@@ -8,18 +8,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class PessimisticLockService {
+public class OptimisticLockService {
 
     private final StockRepository stockRepository;
 
     @Transactional
     public void decrease(Long id, Long quantity){
-        Stock stock = stockRepository.findByIdWithPessimisticLock(id);
-        System.out.println("*****");
+        Stock stock = stockRepository.findByidWithOptimisticLock(id);
         stock.decrease(quantity);
 
-        stockRepository.save(stock);
-        System.out.println(stock.getQuantity());
+        stockRepository.saveAndFlush(stock);
 
     }
 }
